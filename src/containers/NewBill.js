@@ -20,6 +20,7 @@ export default class NewBill {
     const fileTypes = ["image/jpeg", "image/jpg", "image/png"];
     return    fileTypes.includes(file.type)
   };
+
   handleChangeFile = e => {
     e.preventDefault()
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
@@ -29,7 +30,7 @@ export default class NewBill {
     const email = JSON.parse(localStorage.getItem("user")).email
     formData.append('file', file)
     formData.append('email', email)
-    this.fileValidation(file) &&
+    this.fileValidation(file) && //si type de fichier incorrect, on ne l'envoie pas vers le store
     this.store
       .bills()
       .create({
@@ -39,7 +40,7 @@ export default class NewBill {
         }
       })
       .then(({fileUrl, key}) => {
-        console.log(fileUrl)
+       // console.log(fileUrl)
         this.billId = key
         this.fileUrl = fileUrl
         this.fileName = fileName
@@ -47,7 +48,7 @@ export default class NewBill {
   }
   handleSubmit = e => {
     e.preventDefault()
-    console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
+    // console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
     const email = JSON.parse(localStorage.getItem("user")).email
     const bill = {
       email,
@@ -62,12 +63,14 @@ export default class NewBill {
       fileName: this.fileName,
       status: 'pending'
     }
-   //if (!this.fileName) return;
+   if (!this.fileName) return;
+  //si pas de fichier selectionné, submit impossible
     this.updateBill(bill)
     this.onNavigate(ROUTES_PATH['Bills'])
   }
 
   // not need to cover this function by tests
+      /* istanbul ignore next */
   updateBill = (bill) => {
     if (this.store) {
       this.store
