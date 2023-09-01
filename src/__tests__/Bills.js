@@ -6,13 +6,13 @@ import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import BillsUI from "../views/BillsUI.js";
 import { bills } from "../fixtures/bills.js"; // Données mocké de notes de frais
-import { ROUTES_PATH, ROUTES } from "../constants/routes";// Chemins et routes constants
-import { localStorageMock } from "../__mocks__/localStorage.js";// Implémentation mocké de localStorage
+import { ROUTES_PATH, ROUTES } from "../constants/routes"; // Chemins et routes constants
+import { localStorageMock } from "../__mocks__/localStorage.js"; // Implémentation mocké de localStorage
 import mockedStore from "../__mocks__/store"; //Implémentation mocké du store
 import router from "../app/Router.js"; // Gestionnaire de routes
-import Bills from "../containers/Bills.js";// Composant Bills à tester
+import Bills from "../containers/Bills.js"; // Composant Bills à tester
 
-jest.mock("../app/store", () => mockedStore);// Mock du store pour les tests
+jest.mock("../app/store", () => mockedStore); // Mock du store pour les tests
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
@@ -32,7 +32,7 @@ describe("Given I am connected as an employee", () => {
       document.body.append(root);
       router();
       window.onNavigate(ROUTES_PATH.Bills);
-       // Attente de l'affichage de l'icône de fenêtre
+      // Attente de l'affichage de l'icône de fenêtre
       await waitFor(() => screen.getByTestId("icon-window"));
       // Sélection de l'icône de fenêtre
       const windowIcon = screen.getByTestId("icon-window");
@@ -47,14 +47,14 @@ describe("Given I am connected as an employee", () => {
           /^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i
         )
         .map((a) => a.innerHTML);
-        // Fonction pour tri anti-chronologique
+      // Fonction pour tri anti-chronologique
       const antiChrono = (a, b) => (a < b ? 1 : -1);
       // Tri des dates dans l'ordre anti-chronologique
       const datesSorted = [...dates].sort(antiChrono);
-       // Vérification si les dates affichées sont triées correctement
+      // Vérification si les dates affichées sont triées correctement
       expect(dates).toEqual(datesSorted);
     });
-// test : comportement lorsque l'utilisateur clique sur le bouton "Nouvelle note de frais"
+    // test : comportement lorsque l'utilisateur clique sur le bouton "Nouvelle note de frais"
     describe("When I click on New Bill Button", () => {
       test("Then I should be sent on New Bill form", () => {
         // Fonction de simulation de navigation
@@ -130,20 +130,20 @@ describe("Given I am connected as an employee", () => {
         const iconEyes = screen.getAllByTestId("icon-eye");
         // Écoute de l'événement de clic sur l'icône d'œil
         const handleClickIconEye = jest.fn(billsPage.handleClickIconEye);
- // Récupération de l'élément de la fenêtre modale
+        // Récupération de l'élément de la fenêtre modale
         const modale = document.getElementById("modaleFile");
 
         // Mock de la fonction modal Bootstrap pour montrer la modale
-        $.fn.modal = jest.fn(() => modale.classList.add("show")); 
+        $.fn.modal = jest.fn(() => modale.classList.add("show"));
         // Itération sur toutes les icônes d'œil
         iconEyes.forEach((iconEye) => {
-           // Écoute de l'événement de clic sur l'icône d'œil
+          // Écoute de l'événement de clic sur l'icône d'œil
           iconEye.addEventListener("click", () => handleClickIconEye(iconEye));
-           // Simulation d'un clic sur l'icône d'œil
+          // Simulation d'un clic sur l'icône d'œil
           userEvent.click(iconEye);
           // Vérification que la fonction de gestion de clic a été appelée
           expect(handleClickIconEye).toHaveBeenCalled();
-           // Vérification que la fenêtre modale a la classe "show" pour s'afficher
+          // Vérification que la fenêtre modale a la classe "show" pour s'afficher
           expect(modale).toHaveClass("show");
         });
       });
@@ -155,7 +155,7 @@ describe("Given I am connected as an employee", () => {
         document.body.innerHTML = BillsUI({ loading: true });
         // Vérification que le texte "Loading..." est visible à l'écran
         expect(screen.getByText("Loading...")).toBeVisible();
-           // Réinitialisation du contenu du corps du document à une chaîne vide
+        // Réinitialisation du contenu du corps du document à une chaîne vide
         document.body.innerHTML = "";
       });
     });
@@ -164,20 +164,19 @@ describe("Given I am connected as an employee", () => {
       test("Then, Error page should be rendered", () => {
         // Remplacer le contenu du corps du document avec l'interface BillsUI en mode "error"
         document.body.innerHTML = BillsUI({ error: "error message" });
-          // Vérification que le texte "Erreur" est visible à l'écran
+        // Vérification que le texte "Erreur" est visible à l'écran
         expect(screen.getByText("Erreur")).toBeVisible();
         // Réinitialisation du contenu du corps du document à une chaîne vide
         document.body.innerHTML = "";
       });
     });
 
-    
-// test d'intégration GET
+    // test d'intégration GET
     describe("When I navigate to Bills Page as Employee", () => {
       test("fetches bills from mock API GET", async () => {
         // Espionnage de la fonction "bills" du store pour le test
         jest.spyOn(mockedStore, "bills");
-            // Simulation d'un utilisateur connecté en tant qu'employé
+        // Simulation d'un utilisateur connecté en tant qu'employé
         Object.defineProperty(window, "localStorage", {
           value: localStorageMock,
         });
@@ -185,21 +184,21 @@ describe("Given I am connected as an employee", () => {
           "user",
           JSON.stringify({ type: "Employee", email: "a@a" })
         );
-      // Création d'un élément racine pour le rendu de l'application
+        // Création d'un élément racine pour le rendu de l'application
         const root = document.createElement("div");
         root.setAttribute("id", "root");
         document.body.append(root);
         // Mise en place du gestionnaire de routage
         router();
         window.onNavigate(ROUTES_PATH.Bills);
-// Attente de l'affichage du texte "Mes notes de frais"
+        // Attente de l'affichage du texte "Mes notes de frais"
         await waitFor(() => screen.getByText("Mes notes de frais"));
-// Recherche du bouton "Nouvelle note de frais" et de la liste des notes
+        // Recherche du bouton "Nouvelle note de frais" et de la liste des notes
         const newBillBtn = await screen.findByRole("button", {
           name: /nouvelle note de frais/i,
         });
         const billsTableRows = screen.getByTestId("tbody");
-// Vérification de l'existence du bouton et de la liste des notes
+        // Vérification de l'existence du bouton et de la liste des notes
         expect(newBillBtn).toBeTruthy();
         expect(billsTableRows).toBeTruthy();
         // Vérification du nombre de lignes de notes
@@ -207,7 +206,7 @@ describe("Given I am connected as an employee", () => {
       });
 
       test("fetches bills from an API and fails with 404 message error", async () => {
-          // Simulation de l'échec de la requête GET avec un message d'erreur 404
+        // Simulation de l'échec de la requête GET avec un message d'erreur 404
         mockedStore.bills.mockImplementationOnce(() => {
           return {
             list: () => {
@@ -215,12 +214,12 @@ describe("Given I am connected as an employee", () => {
             },
           };
         });
-        
-    // Simulation de la navigation vers la page des notes de frais
+
+        // Simulation de la navigation vers la page des notes de frais
         window.onNavigate(ROUTES_PATH.Bills);
         // Attente d'une "prochaine fois" de traitement (dans ce cas, échec de la requête)
         await new Promise(process.nextTick);
-         // Vérification de la présence du message d'erreur 404
+        // Vérification de la présence du message d'erreur 404
         const message = screen.getByText(/Erreur 404/);
         expect(message).toBeTruthy();
       });
@@ -242,4 +241,3 @@ describe("Given I am connected as an employee", () => {
     });
   });
 });
-
