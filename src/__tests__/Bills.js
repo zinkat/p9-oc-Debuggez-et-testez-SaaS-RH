@@ -17,6 +17,7 @@ jest.mock("../app/store", () => mockedStore); // Mock du store pour les tests
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", async () => {
+      //vérifie si l'icône des factures dans la mise en page verticale est mise en surbrillance correctement
       // Simulation de l'utilisateur connecté en tant qu'employé
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,
@@ -27,11 +28,12 @@ describe("Given I am connected as an employee", () => {
           type: "Employee",
         })
       );
+      //simulation de la structure de la page id root
       const root = document.createElement("div");
       root.setAttribute("id", "root");
       document.body.append(root);
-      router();
-      window.onNavigate(ROUTES_PATH.Bills);
+      router(); // gestion de la navigation
+      window.onNavigate(ROUTES_PATH.Bills); //appelle la navigation vers la page des factures
       // Attente de l'affichage de l'icône de fenêtre
       await waitFor(() => screen.getByTestId("icon-window"));
       // Sélection de l'icône de fenêtre
@@ -40,6 +42,7 @@ describe("Given I am connected as an employee", () => {
       expect(windowIcon).toHaveClass("active-icon"); //vérification si l'icône a une classe CSS appelée "active-icon".
     });
     test("Then bills should be ordered from earliest to latest", () => {
+      //insertion du contenu de l'interface générer par BillsUI => simule la présence des notes de frais sur la page.
       document.body.innerHTML = BillsUI({ data: bills });
       // Extraction des dates des notes de frais affichées
       const dates = screen
@@ -47,14 +50,14 @@ describe("Given I am connected as an employee", () => {
           /^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i
         )
         .map((a) => a.innerHTML);
-      // Fonction pour tri anti-chronologique
+      // Fonction pour trier les dates dasn l'ordre anti-chronologique () comparaison
       const antiChrono = (a, b) => (a < b ? 1 : -1);
-      // Tri des dates dans l'ordre anti-chronologique
+      // creation copie tableau date et le trier selon () antichrono
       const datesSorted = [...dates].sort(antiChrono);
-      // Vérification si les dates affichées sont triées correctement
+      // Vérification si les dates affichées sont triées correctement dans l'ordre attendu
       expect(dates).toEqual(datesSorted);
     });
-    // test : comportement lorsque l'utilisateur clique sur le bouton "Nouvelle note de frais"
+    // test : comportement attendu lorsque l'utilisateur clique sur le bouton "Nouvelle note de frais"
     describe("When I click on New Bill Button", () => {
       test("Then I should be sent on New Bill form", () => {
         // Fonction de simulation de navigation
@@ -173,8 +176,9 @@ describe("Given I am connected as an employee", () => {
 
     // test d'intégration GET
     describe("When I navigate to Bills Page as Employee", () => {
+      //vérifcation que la page des notes de frais récupère les factures depuis une API mock en effectuant une requête GET réussie.
       test("fetches bills from mock API GET", async () => {
-        // Espionnage de la fonction "bills" du store pour le test
+        // Espionnage de la fonction "bills" du store mock pour le test
         jest.spyOn(mockedStore, "bills");
         // Simulation d'un utilisateur connecté en tant qu'employé
         Object.defineProperty(window, "localStorage", {
@@ -225,16 +229,20 @@ describe("Given I am connected as an employee", () => {
       });
 
       test("fetches messages from an API and fails with 500 message error", async () => {
+        //Simulation de l'échec de la requête GET avec un message d'erreur 500
         mockedStore.bills.mockImplementationOnce(() => {
           return {
+            // simulation de l'échec de la requête GET en modifiant le comportement de la fonction list de mockedStore.bills.
             list: () => {
               return Promise.reject(new Error("Erreur 500"));
             },
           };
         });
-
+        //simulation de la navigation vers la page des notes de frais.
         window.onNavigate(ROUTES_PATH.Bills);
+        //attend que la requête échoue.
         await new Promise(process.nextTick);
+        //vérifie la présence du message d'erreur 500 dans l'interface.
         const message = screen.getByText(/Erreur 500/);
         expect(message).toBeTruthy();
       });
