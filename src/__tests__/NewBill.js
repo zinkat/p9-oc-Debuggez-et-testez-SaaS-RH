@@ -288,6 +288,19 @@ describe("When I do fill fields in correct format and I click on submit button",
   });
   describe("When an error occurs on API", () => {
     test("Then new bill is added to the API but fetch fails with '404 page not found' error", async () => {
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+        })
+      );
+
+      document.body.innerHTML = NewBillUI();
+
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+
       const setNewBill = () => {
         return new NewBill({
           document,
@@ -309,6 +322,46 @@ describe("When I do fill fields in correct format and I click on submit button",
       await expect(mockedBill().create).rejects.toThrow("Erreur 404");
 
       expect(mockedBill).toHaveBeenCalledTimes(1);
+
+      expect(newBill.billId).toBeNull();
+      expect(newBill.fileUrl).toBeNull();
+      expect(newBill.fileName).toBeNull();
+    });
+
+    test("Then new bill is added to the API but fetch fails with '500 Internal Server error'", async () => {
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+        })
+      );
+
+      document.body.innerHTML = NewBillUI();
+
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+      const setNewBill = () => {
+        return new NewBill({
+          document,
+          onNavigate,
+          store: mockStore,
+          localStorage: window.localStorage,
+        });
+      };
+      const newBill = setNewBill();
+
+      const mockedBill = jest
+        .spyOn(mockStore, "bills")
+        .mockImplementation(() => {
+          return {
+            create: jest.fn().mockRejectedValue(new Error("Erreur 500")),
+          };
+        });
+
+      await expect(mockedBill().create).rejects.toThrow("Erreur 500");
+
+      expect(mockedBill).toHaveBeenCalled();
 
       expect(newBill.billId).toBeNull();
       expect(newBill.fileUrl).toBeNull();
