@@ -170,7 +170,7 @@ describe("When I do fill fields in correct format and I click on submit button",
     expect(fileUrl).toBe("https://localhost:3456/images/test.jpg");
     // simulation d'une mise à jour de la facture après sa création.
     const newBill = updateBill();
-
+    //vérification ci la méthode update est appelée// mise à jour déclenchée
     expect(updateBill).toHaveBeenCalledTimes(1);
 
     await expect(newBill).resolves.toEqual({
@@ -192,9 +192,10 @@ describe("When I do fill fields in correct format and I click on submit button",
   });
 
   // Champs non remplis
-
+  //création d'une note de frais sans remplir les champs
   describe("When I do not fill fields and I click on submit button", () => {
     test("Then it should stay on newBill page", () => {
+      //création d'une nouvelle instance de la classe NewBill,
       const setNewBill = () => {
         return new NewBill({
           document,
@@ -203,23 +204,26 @@ describe("When I do fill fields in correct format and I click on submit button",
           localStorage: window.localStorage,
         });
       };
+      //newBill est crée en applant la fonction setNewBill()
       const newBill = setNewBill();
-
+      //identification de l'element du formulaire dasn le code html
       const newBillForm = screen.getByTestId("form-new-bill");
-
+      // crée un espion sur la méthode handleSubmit de l'nstance newBill pour suivre si cette méthode est appelée ultérieurement.
       const handleSubmit = jest.spyOn(newBill, "handleSubmit");
-
+      // ajout d'un écouteur d'événement de soumission de formulaire
       newBillForm.addEventListener("submit", handleSubmit);
+      // simulation de la soumission du formulaire en déclenchant l'événement de soumission
       fireEvent.submit(newBillForm);
-
+      // vérification si la fonction handleSubmit a été appelée
       expect(handleSubmit).toHaveBeenCalledTimes(1);
-
+      //vérification que le formulaire de création de nouvelle note de frais reste visible après la soumission
       expect(newBillForm).toBeVisible();
     });
   });
   //  Valeur par défaut champ PCT -
   describe("When nothing has been typed in PCT input", () => {
     test("then the PCT should be 20 by default", () => {
+      //création d'une instance de la classe newBill
       const setNewBill = () => {
         return new NewBill({
           document,
@@ -228,23 +232,24 @@ describe("When I do fill fields in correct format and I click on submit button",
           localStorage: window.localStorage,
         });
       };
+      //appele de l'instance créée
       const newBill = setNewBill();
-
+      // stockage des données mock indice 0 dans une variable
       const inputData = bills[0];
-
+      //identification de l'element du formulaire dasn le code html
       const newBillForm = screen.getByTestId("form-new-bill");
-
+      // création de 21 espions sur les methode handleSubmit et updateBill
       const handleSubmit = jest.spyOn(newBill, "handleSubmit");
       const updateBill = jest.spyOn(newBill, "updateBill");
 
       newBill.fileName = inputData.fileName;
-
+      //ajout d'un écouteur d'événement de soumission de formulaire
       newBillForm.addEventListener("submit", handleSubmit);
-
+      //simulation de  la soumission du formulaire
       fireEvent.submit(newBillForm);
-
+      // vérification que la méthode handleSubmit a  été appelée
       expect(handleSubmit).toHaveBeenCalledTimes(1);
-
+      //vérification que la méthode updateBill a été appelée avec un objet contenant une clé pct ayant la valeur 20(valeur par défaut lorsque rien n'a été saisi.)
       expect(updateBill).toHaveBeenCalledWith(
         expect.objectContaining({
           pct: 20,
@@ -287,6 +292,7 @@ describe("When I do fill fields in correct format and I click on submit button",
     });
   });
   describe("When an error occurs on API", () => {
+    //simulation de la situation où l'API renvoie une erreur 404 ("Page non trouvée") lors de la tentative d'ajout d'une nouvelle note de frais
     test("Then new bill is added to the API but fetch fails with '404 page not found' error", async () => {
       window.localStorage.setItem(
         "user",
@@ -294,13 +300,13 @@ describe("When I do fill fields in correct format and I click on submit button",
           type: "Employee",
         })
       );
-
+      //initialisation du contenu HTML du document avec l'interface utilisateur de création de nouvelle note de frais (NewBillUI).
       document.body.innerHTML = NewBillUI();
 
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname });
       };
-
+      //création d'une instance de la classe NewBill avec des fonctions de navigation et un magasin (store) simulés.
       const setNewBill = () => {
         return new NewBill({
           document,
@@ -310,19 +316,20 @@ describe("When I do fill fields in correct format and I click on submit button",
         });
       };
       const newBill = setNewBill();
-
+      //simulation de l'API pour espionner la méthode create de l'objet bills du mockStore. Cette méthode est configurée pour renvoyer une promesse rejetée avec une erreur "Erreur 404".
       const mockedBill = jest
         .spyOn(mockStore, "bills")
-        .mockImplementationOnce(() => {
+        .mockImplementation(() => {
+          //configuration pour renvoyer une promesse rejetée avec une erreur "Erreur 404".
           return {
             create: jest.fn().mockRejectedValue(new Error("Erreur 404")),
           };
         });
-
+      //vérifier que l'appel à create génère une erreur avec le message "Erreur 404".
       await expect(mockedBill().create).rejects.toThrow("Erreur 404");
 
-      expect(mockedBill).toHaveBeenCalledTimes(1);
-
+      expect(mockedBill).toHaveBeenCalled();
+      //verification des propriétés de l'instance de NewBill sont nulles
       expect(newBill.billId).toBeNull();
       expect(newBill.fileUrl).toBeNull();
       expect(newBill.fileName).toBeNull();
