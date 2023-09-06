@@ -39,35 +39,39 @@ export default class {
   getBills = () => {
     if (this.store) {
       //console.log(this.store);
+      // Vérifie si l'objet "store" est défini
+      // L'objet "store" doit être disponible pour effectuer cette opération.
       // Récupère une liste de factures à partir du store
       return this.store
         .bills()
         .list()
         .then((snapshot) => {
-          // Trie les factures par date en ordre décroissant
-          const bills = snapshot
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .map((doc) => {
-              try {
-                // Tente de formater la date  dd/mm/yyyy et le statut
-                return {
-                  ...doc,
-                  date: formatDate(doc.date),
-                  status: formatStatus(doc.status),
-                };
-              } catch (e) {
-                // if for some reason, corrupted data was introduced, we manage here failing formatDate function
-                // log the error and return unformatted date in that case
-                //console.log(e,'for',doc)
-                return {
-                  ...doc,
-                  date: doc.date,
-                  status: formatStatus(doc.status),
-                };
-              }
-            });
+          // Appelle la méthode "list()" sur l'objet "bills" du store pour récupérer une liste de factures.
+          // récupération des données.
+          const bills = snapshot.map((doc) => {
+            // Itère sur chaque élément de la liste des factures (snapshot).
+            try {
+              // Essaye de formater les données de la facture, y compris la date et le statut.
+              // Si les données sont valides, elles sont formatées avec les fonctions "formatDate" et "formatStatus".
+              return {
+                ...doc,
+                date: doc.date, //retourner et  Conserve la date d'origine.
+                dateFormated: formatDate(doc.date), //formatte la date
+                status: formatStatus(doc.status), //formatte le statut
+              };
+            } catch (e) {
+              // if for some reason, corrupted data was introduced, we manage here failing formatDate function
+              // log the error and return unformatted date in that case
+              //console.log(e,'for',doc)
+              return {
+                ...doc,
+                date: doc.date, // conserve la date d'origine
+                status: formatStatus(doc.status), //// Formatte le statut
+              };
+            }
+          });
           console.log("length", bills.length);
-          return bills; // Retourne le tableau de factures traité
+          return bills; /// Retourne le tableau de factures, qu'elles soient formatées ou non.
         });
     }
   };

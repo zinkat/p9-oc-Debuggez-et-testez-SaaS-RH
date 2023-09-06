@@ -3,13 +3,16 @@ import ErrorPage from "./ErrorPage.js";
 import LoadingPage from "./LoadingPage.js";
 
 import Actions from "./Actions.js";
-
+// Fonction 'row' qui génère une ligne HTML pour une facture donnée.
 const row = (bill) => {
+  // Formatte la date de la facture, en utilisant 'bill.dateFormated' s'il existe, sinon 'bill.date' brut.
+  const billDate = bill.dateFormated ?? bill.date;
+  // Retourne une chaîne de caractères avec le modèle HTML d'une ligne de tableau pour la facture.
   return `
     <tr>
       <td>${bill.type}</td>
       <td>${bill.name}</td>
-      <td>${bill.date}</td>
+      <td>${billDate}</td>
       <td>${bill.amount} €</td>
       <td>${bill.status}</td>
       <td>
@@ -19,18 +22,14 @@ const row = (bill) => {
     `;
 };
 
-// Génère toutes les lignes du tableau HTML pour un ensemble de données de factures.
+// Fonction 'rows' qui génère toutes les lignes du tableau HTML pour un ensemble de données de factures.
 const rows = (data) => {
+  // Vérifie si 'data' est défini et s'il contient des éléments (factures)
   return data && data.length
     ? data
-        .sort((a, b) => new Date(b.date) - new Date(a.date)) //Trie les factures par date décroissante.
-        .map((bill) =>
-          row({
-            ...bill,
-            date: bill.date, // Utilise la date de la facture actuelle
-          })
-        )
-        .join("")
+        .sort((a, b) => (a.date < b.date ? 1 : -1)) // Trie les factures par date, du plus récent au plus ancien.
+        .map((bill) => row(bill)) // Mappe chaque facture en une ligne HTML en utilisant la fonction 'row'.
+        .join("") // Joint toutes les lignes en une seule chaîne de caractères.
     : "";
 };
 
